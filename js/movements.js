@@ -1,5 +1,23 @@
 // Historial de movimientos de stock (entradas/salidas).
 
+let currentMovements = [];
+let currentShowProduct = true;
+let currentFilter = 'all';
+
+const MOVEMENT_ICONS = {
+  entrada: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>',
+  salida: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>',
+};
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 async function fetchMovements(productId = null) {
   let query = supabaseClient
     .from('stock_movements')
@@ -18,38 +36,87 @@ async function fetchMovements(productId = null) {
   return data;
 }
 
-function renderMovements(movements, { showProduct = true } = {}) {
+function formatDayLabel(isoDate) {
+  const date = new Date(isoDate);
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+
+  const isSameDay = (a, b) =>
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+  if (isSameDay(date, now)) return 'Hoy';
+  if (isSameDay(date, yesterday)) return 'Ayer';
+  return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function formatTime(isoDate) {
+  return new Date(isoDate).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderMovements(movements) {
   const container = document.getElementById('history-list');
   container.innerHTML = '';
 
-  if (movements.length === 0) {
-    container.innerHTML = '<p class="empty-text">Todavía no hay movimientos registrados.</p>';
+  const filtered = currentFilter === 'all' ? movements : movements.filter((m) => m.type === currentFilter);
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<p class="empty-text">No hay movimientos que coincidan con este filtro.</p>';
     return;
   }
 
-  movements.forEach((m) => {
+  let lastDayLabel = null;
+
+  filtered.forEach((m) => {
+    const dayLabel = formatDayLabel(m.created_at);
+    if (dayLabel !== lastDayLabel) {
+      const header = document.createElement('p');
+      header.className = 'history-date-header';
+      header.textContent = dayLabel;
+      container.appendChild(header);
+      lastDayLabel = dayLabel;
+    }
+
+    const sign = m.type === 'entrada' ? '+' : '−';
+    const userName = m.profiles ? escapeHtml(m.profiles.full_name) : 'Usuario';
+
     const row = document.createElement('div');
-    row.className = `history-row history-${m.type}`;
-
-    const date = new Date(m.created_at).toLocaleString('es-ES');
-    const productLabel = showProduct && m.products
-      ? `${m.products.model} (${m.products.size}, ${m.products.color}) — `
-      : '';
-    const sign = m.type === 'entrada' ? '+' : '-';
-    const userName = m.profiles ? m.profiles.full_name : 'Usuario';
-
+    row.className = 'history-row';
     row.innerHTML = `
-      <span class="history-type">${m.type === 'entrada' ? 'Entrada' : 'Salida'}</span>
-      <span class="history-detail">${productLabel}${sign}${m.quantity} unidades</span>
-      <span class="history-meta">${userName} · ${date}${m.note ? ' · ' + m.note : ''}</span>
+      <span class="history-icon ${m.type}">${MOVEMENT_ICONS[m.type]}</span>
+      <div class="history-content">
+        <span class="history-amount ${m.type}">${sign}${m.quantity} unidades</span>
+        ${currentShowProduct && m.products ? `<span class="history-product">${escapeHtml(m.products.model)} · Talla ${escapeHtml(m.products.size)} · ${escapeHtml(m.products.color)}</span>` : ''}
+        <span class="history-meta">${userName} · ${formatTime(m.created_at)}${m.note ? ' · ' + escapeHtml(m.note) : ''}</span>
+      </div>
     `;
     container.appendChild(row);
   });
 }
 
+function setHistoryFilter(filter) {
+  currentFilter = filter;
+  document.querySelectorAll('.history-filter-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
+  });
+  renderMovements(currentMovements);
+}
+
 async function openHistoryModal(productId = null, title = 'Historial de movimientos') {
   document.getElementById('history-modal-title').textContent = title;
-  const movements = await fetchMovements(productId);
-  renderMovements(movements, { showProduct: !productId });
+  currentShowProduct = !productId;
+  currentFilter = 'all';
+  document.querySelectorAll('.history-filter-btn').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.filter === 'all');
+  });
+
+  currentMovements = await fetchMovements(productId);
+  renderMovements(currentMovements);
   document.getElementById('history-modal').classList.remove('hidden');
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.history-filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => setHistoryFilter(btn.dataset.filter));
+  });
+});

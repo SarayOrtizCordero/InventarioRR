@@ -2,6 +2,24 @@
 
 let categories = [];
 let activeCategoryId = null;
+const LOW_STOCK_THRESHOLD = 5;
+
+const ICONS = {
+  minus: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  plus: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  history: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>',
+  trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>',
+  warning: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>',
+};
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 async function initDashboard() {
   const session = await requireSession();
@@ -9,9 +27,9 @@ async function initDashboard() {
 
   const profile = await getCurrentProfile();
   if (profile) {
-    document.getElementById('user-name').textContent = profile.full_name;
-    document.getElementById('user-role').textContent =
-      profile.role === 'jefe' ? 'Jefe' : 'Mano derecha';
+    const avatarEl = document.getElementById('user-avatar');
+    avatarEl.textContent = profile.full_name.trim().charAt(0).toUpperCase();
+    avatarEl.title = profile.full_name;
   }
 
   document.getElementById('logout-btn').addEventListener('click', logout);
@@ -83,7 +101,9 @@ async function loadProducts() {
 
 function renderProducts(products) {
   const grid = document.getElementById('products-grid');
+  const countBadge = document.getElementById('products-count');
   grid.innerHTML = '';
+  countBadge.textContent = products.length;
 
   if (products.length === 0) {
     grid.innerHTML = '<p class="empty-text">No hay productos en esta categoría todavía.</p>';
@@ -93,21 +113,30 @@ function renderProducts(products) {
   products.forEach((p) => {
     const card = document.createElement('article');
     card.className = 'product-card';
+    const lowStock = p.quantity <= LOW_STOCK_THRESHOLD;
+    const model = escapeHtml(p.model);
+    const size = escapeHtml(p.size);
+    const color = escapeHtml(p.color);
     card.innerHTML = `
-      <h3>${p.model}</h3>
-      <p class="product-variant">Talla ${p.size} · ${p.color}</p>
+      <h3>${model}</h3>
+      <p class="product-variant">Talla ${size} · ${color}</p>
+      ${lowStock ? `<span class="stock-badge">${ICONS.warning} Stock bajo</span>` : ''}
       <p class="product-quantity">${p.quantity} <span>unidades</span></p>
       <div class="product-actions">
-        <button class="btn-stock btn-stock-minus" data-id="${p.id}" data-type="salida" title="Restar stock">−</button>
-        <button class="btn-stock btn-stock-plus" data-id="${p.id}" data-type="entrada" title="Sumar stock">+</button>
-        <button class="btn-icon btn-history" data-id="${p.id}" data-label="${p.model} (${p.size}, ${p.color})" title="Historial">🕘</button>
-        <button class="btn-icon btn-delete" data-id="${p.id}" title="Eliminar">🗑</button>
+        <div class="stock-stepper">
+          <button class="stepper-minus" data-id="${p.id}" data-type="salida" title="Restar stock" aria-label="Restar stock">${ICONS.minus}</button>
+          <button class="stepper-plus" data-id="${p.id}" data-type="entrada" title="Sumar stock" aria-label="Sumar stock">${ICONS.plus}</button>
+        </div>
+        <div class="product-actions-secondary">
+          <button class="icon-btn btn-history" data-id="${p.id}" data-label="${model} (${size}, ${color})" title="Ver historial" aria-label="Ver historial">${ICONS.history}</button>
+          <button class="icon-btn danger btn-delete" data-id="${p.id}" title="Eliminar producto" aria-label="Eliminar producto">${ICONS.trash}</button>
+        </div>
       </div>
     `;
     grid.appendChild(card);
   });
 
-  grid.querySelectorAll('.btn-stock').forEach((btn) => {
+  grid.querySelectorAll('.stepper-minus, .stepper-plus').forEach((btn) => {
     btn.addEventListener('click', () => openStockModal(btn.dataset.id, btn.dataset.type));
   });
   grid.querySelectorAll('.btn-history').forEach((btn) => {

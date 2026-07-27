@@ -38,6 +38,15 @@ function initLoginForm() {
   if (!form) return;
 
   const errorBox = document.getElementById('login-error');
+  const toggleBtn = document.getElementById('toggle-password');
+  const passwordInput = document.getElementById('password');
+
+  toggleBtn.addEventListener('click', () => {
+    const isHidden = passwordInput.type === 'password';
+    passwordInput.type = isHidden ? 'text' : 'password';
+    toggleBtn.setAttribute('aria-label', isHidden ? 'Ocultar contraseña' : 'Mostrar contraseña');
+    toggleBtn.classList.toggle('active', isHidden);
+  });
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
