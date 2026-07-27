@@ -33,11 +33,7 @@ values ('UID-DE-LA-MANO-DERECHA', 'Nombre Mano Derecha', 'mano_derecha');
 
 ## 3. (Opcional) Cargar prendas de ejemplo
 
-Para que el dashboard no se vea vacío en la demo, ve a **SQL Editor** y ejecuta el contenido de [`sql/seed_data.sql`](sql/seed_data.sql). Crea 11 prendas de ejemplo repartidas en las 5 categorías, con su stock inicial ya registrado como movimiento. Ejecútalo una sola vez (no está pensado para correr dos veces, duplicaría los productos).
-
-Para tener más variedad de modelos, tallas y colores con los que probar el filtrado (útil para ver la vista de modelos/subcategorías en acción), ejecuta también [`sql/seed_more_data.sql`](sql/seed_more_data.sql). Añade ~40 variantes más repartidas en varios modelos por categoría (basados en nombres reales del catálogo Roly), también pensado para ejecutarse una sola vez.
-
-Para que **cada modelo** (incluidos los originales) tenga más tallas y colores donde probar los filtros, ejecuta también [`sql/seed_variants_expansion.sql`](sql/seed_variants_expansion.sql). Añade ~46 variantes más repartidas entre todos los modelos ya existentes.
+Para que el dashboard no se vea vacío en la demo, ve a **SQL Editor** y ejecuta el contenido de [`sql/seed_data.sql`](sql/seed_data.sql). Crea 97 prendas de ejemplo repartidas en 19 modelos (basados en el catálogo real de Roly) dentro de las 5 categorías, cada una con varias tallas y colores para poder probar el filtrado de la vista de modelos/variantes, con su stock inicial ya registrado como movimiento. Ejecútalo una sola vez (no está pensado para correr dos veces, duplicaría los productos).
 
 ## 4. Probar en local
 
