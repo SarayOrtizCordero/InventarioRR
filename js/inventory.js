@@ -1,7 +1,9 @@
-// Lógica principal del dashboard: categorías, productos y ajustes de stock.
+// Lógica principal del dashboard: categorías, modelos, variantes y ajustes de stock.
 
 let categories = [];
 let activeCategoryId = null;
+let activeModel = null;
+let categoryProducts = [];
 const LOW_STOCK_THRESHOLD = 5;
 
 const ICONS = {
@@ -10,6 +12,7 @@ const ICONS = {
   history: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>',
   trash: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/></svg>',
   warning: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg>',
+  chevron: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
 };
 
 function escapeHtml(value) {
@@ -66,6 +69,7 @@ async function loadCategories() {
     tab.textContent = cat.name;
     tab.addEventListener('click', () => {
       activeCategoryId = cat.id;
+      activeModel = null;
       document.querySelectorAll('.category-tab').forEach((t) => t.classList.remove('active'));
       tab.classList.add('active');
       loadProducts();
@@ -88,7 +92,9 @@ async function loadProducts() {
     .from('products')
     .select('id, model, size, color, quantity, category_id')
     .eq('category_id', activeCategoryId)
-    .order('model');
+    .order('model')
+    .order('size')
+    .order('color');
 
   if (error) {
     console.error('Error cargando productos:', error.message);
@@ -96,19 +102,125 @@ async function loadProducts() {
     return;
   }
 
-  renderProducts(data);
+  categoryProducts = data;
+  renderCurrentView();
 }
 
-function renderProducts(products) {
-  const grid = document.getElementById('products-grid');
-  const countBadge = document.getElementById('products-count');
-  grid.innerHTML = '';
-  countBadge.textContent = products.length;
+function renderCurrentView() {
+  if (activeModel) {
+    renderVariants();
+  } else {
+    renderModels();
+  }
+}
 
-  if (products.length === 0) {
+function setProductsPanelHeader({ showBack, title, count }) {
+  document.getElementById('back-to-models').classList.toggle('hidden', !showBack);
+  document.getElementById('products-panel-title').textContent = title;
+  document.getElementById('products-count').textContent = count;
+  document.getElementById('variant-filters').classList.toggle('hidden', !showBack);
+}
+
+// --- Vista de modelos (agrupados por nombre dentro de la categoría) ---
+function renderModels() {
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = '';
+
+  const groups = new Map();
+  categoryProducts.forEach((p) => {
+    if (!groups.has(p.model)) groups.set(p.model, []);
+    groups.get(p.model).push(p);
+  });
+
+  setProductsPanelHeader({ showBack: false, title: 'Productos', count: groups.size });
+
+  if (groups.size === 0) {
     grid.innerHTML = '<p class="empty-text">No hay productos en esta categoría todavía.</p>';
     return;
   }
+
+  Array.from(groups.entries())
+    .sort((a, b) => a[0].localeCompare(b[0], 'es'))
+    .forEach(([model, variants]) => {
+      const totalQty = variants.reduce((sum, v) => sum + v.quantity, 0);
+      const lowStock = variants.some((v) => v.quantity <= LOW_STOCK_THRESHOLD);
+
+      const card = document.createElement('article');
+      card.className = 'model-card';
+      card.innerHTML = `
+        <div class="model-card-info">
+          <h3>${escapeHtml(model)}</h3>
+          <p class="model-card-meta">
+            ${variants.length} ${variants.length === 1 ? 'variante' : 'variantes'} · ${totalQty} unidades
+            ${lowStock ? `<span class="stock-badge">${ICONS.warning} Stock bajo</span>` : ''}
+          </p>
+        </div>
+        <span class="model-card-chevron">${ICONS.chevron}</span>
+      `;
+      card.addEventListener('click', () => enterModel(model));
+      grid.appendChild(card);
+    });
+}
+
+function enterModel(model) {
+  activeModel = model;
+  document.getElementById('filter-color').value = '';
+  document.getElementById('filter-size').value = '';
+  renderVariants();
+}
+
+function exitToModels() {
+  activeModel = null;
+  renderModels();
+}
+
+// --- Vista de variantes (talla + color) de un modelo ---
+function populateFilterOptions(variants) {
+  const colorSelect = document.getElementById('filter-color');
+  const sizeSelect = document.getElementById('filter-size');
+  const currentColor = colorSelect.value;
+  const currentSize = sizeSelect.value;
+
+  const colors = [...new Set(variants.map((v) => v.color))].sort((a, b) => a.localeCompare(b, 'es'));
+  const sizes = [...new Set(variants.map((v) => v.size))].sort((a, b) => a.localeCompare(b, 'es'));
+
+  colorSelect.innerHTML =
+    '<option value="">Todos los colores</option>' +
+    colors.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+  sizeSelect.innerHTML =
+    '<option value="">Todas las tallas</option>' +
+    sizes.map((s) => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+
+  colorSelect.value = colors.includes(currentColor) ? currentColor : '';
+  sizeSelect.value = sizes.includes(currentSize) ? currentSize : '';
+}
+
+function renderVariants() {
+  const grid = document.getElementById('products-grid');
+  grid.innerHTML = '';
+
+  const allVariants = categoryProducts.filter((p) => p.model === activeModel);
+  populateFilterOptions(allVariants);
+
+  const colorFilter = document.getElementById('filter-color').value;
+  const sizeFilter = document.getElementById('filter-size').value;
+
+  const filtered = allVariants.filter(
+    (p) => (!colorFilter || p.color === colorFilter) && (!sizeFilter || p.size === sizeFilter)
+  );
+
+  setProductsPanelHeader({ showBack: true, title: activeModel, count: filtered.length });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<p class="empty-text">No hay variantes que coincidan con este filtro.</p>';
+    return;
+  }
+
+  renderProductCards(filtered);
+}
+
+function renderProductCards(products) {
+  const grid = document.getElementById('products-grid');
 
   products.forEach((p) => {
     const card = document.createElement('article');
@@ -257,6 +369,10 @@ function wireModals() {
 
   document.getElementById('add-product-form').addEventListener('submit', handleAddProduct);
   document.getElementById('stock-form').addEventListener('submit', handleStockSubmit);
+
+  document.getElementById('back-to-models').addEventListener('click', exitToModels);
+  document.getElementById('filter-color').addEventListener('change', renderVariants);
+  document.getElementById('filter-size').addEventListener('change', renderVariants);
 }
 
 document.addEventListener('DOMContentLoaded', initDashboard);

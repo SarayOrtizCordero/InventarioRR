@@ -49,10 +49,24 @@
 
     <section class="panel products-panel">
       <div class="panel-header">
-        <h2 class="panel-title">Productos <span class="count-badge" id="products-count">0</span></h2>
+        <h2 class="panel-title">
+          <button id="back-to-models" class="back-btn hidden" title="Volver a modelos" aria-label="Volver a modelos">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <span id="products-panel-title">Productos</span>
+          <span class="count-badge" id="products-count">0</span>
+        </h2>
+        <div class="variant-filters hidden" id="variant-filters">
+          <select id="filter-color">
+            <option value="">Todos los colores</option>
+          </select>
+          <select id="filter-size">
+            <option value="">Todas las tallas</option>
+          </select>
+        </div>
       </div>
       <div id="products-grid" class="products-grid">
-        <!-- Tarjetas de producto generadas por JS -->
+        <!-- Tarjetas de modelo o de producto generadas por JS -->
       </div>
     </section>
   </main>

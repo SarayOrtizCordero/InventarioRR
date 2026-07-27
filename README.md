@@ -35,6 +35,10 @@ values ('UID-DE-LA-MANO-DERECHA', 'Nombre Mano Derecha', 'mano_derecha');
 
 Para que el dashboard no se vea vacío en la demo, ve a **SQL Editor** y ejecuta el contenido de [`sql/seed_data.sql`](sql/seed_data.sql). Crea 11 prendas de ejemplo repartidas en las 5 categorías, con su stock inicial ya registrado como movimiento. Ejecútalo una sola vez (no está pensado para correr dos veces, duplicaría los productos).
 
+Para tener más variedad de modelos, tallas y colores con los que probar el filtrado (útil para ver la vista de modelos/subcategorías en acción), ejecuta también [`sql/seed_more_data.sql`](sql/seed_more_data.sql). Añade ~40 variantes más repartidas en varios modelos por categoría (basados en nombres reales del catálogo Roly), también pensado para ejecutarse una sola vez.
+
+Para que **cada modelo** (incluidos los originales) tenga más tallas y colores donde probar los filtros, ejecuta también [`sql/seed_variants_expansion.sql`](sql/seed_variants_expansion.sql). Añade ~46 variantes más repartidas entre todos los modelos ya existentes.
+
 ## 4. Probar en local
 
 Abre `index.html` con una extensión tipo "Live Server" (VS Code) o cualquier servidor estático local (no funciona con doble clic directo por CORS del navegador). Inicia sesión con cualquiera de las dos cuentas creadas.
