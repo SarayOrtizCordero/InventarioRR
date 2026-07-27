@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inventario · Panel</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-brand">
+      <span class="brand-mark">IR</span>
+      <h1>Inventario de Ropa</h1>
+    </div>
+    <div class="user-info">
+      <span id="user-name">...</span>
+      <span id="user-role" class="badge">...</span>
+      <button id="logout-btn" class="btn-secondary">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="dashboard">
+    <nav class="category-tabs" id="category-tabs">
+      <!-- Pestañas de categoría generadas por JS -->
+    </nav>
+
+    <div class="dashboard-actions">
+      <button id="open-add-product" class="btn-primary">+ Añadir producto</button>
+      <button id="open-history" class="btn-secondary">Ver historial</button>
+    </div>
+
+    <section id="products-grid" class="products-grid">
+      <!-- Tarjetas de producto generadas por JS -->
+    </section>
+  </main>
+
+  <!-- Modal: Añadir producto -->
+  <div id="add-product-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2>Añadir producto</h2>
+      <form id="add-product-form">
+        <label for="product-category">Categoría</label>
+        <select id="product-category" required></select>
+
+        <label for="product-model">Modelo</label>
+        <input type="text" id="product-model" required placeholder="Ej: Básica Cuello Redondo">
+
+        <label for="product-size">Talla</label>
+        <select id="product-size" required>
+          <option value="XS">XS</option>
+          <option value="S">S</option>
+          <option value="M" selected>M</option>
+          <option value="L">L</option>
+          <option value="XL">XL</option>
+          <option value="XXL">XXL</option>
+        </select>
+
+        <label for="product-color">Color</label>
+        <input type="text" id="product-color" required placeholder="Ej: Azul marino">
+
+        <label for="product-quantity">Cantidad inicial</label>
+        <input type="number" id="product-quantity" min="0" value="1" required>
+
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" data-close-modal="add-product-modal">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar producto</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ajustar stock -->
+  <div id="stock-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 id="stock-modal-title">Ajustar stock</h2>
+      <form id="stock-form">
+        <input type="hidden" id="stock-product-id">
+        <input type="hidden" id="stock-type">
+
+        <label for="stock-quantity">Cantidad</label>
+        <input type="number" id="stock-quantity" min="1" value="1" required>
+
+        <label for="stock-note">Nota (opcional)</label>
+        <input type="text" id="stock-note" placeholder="Ej: Reposición proveedor">
+
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" data-close-modal="stock-modal">Cancelar</button>
+          <button type="submit" class="btn-primary">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Historial de movimientos -->
+  <div id="history-modal" class="modal hidden">
+    <div class="modal-content modal-wide">
+      <h2 id="history-modal-title">Historial de movimientos</h2>
+      <div id="history-list" class="history-list"></div>
+      <div class="modal-buttons">
+        <button type="button" class="btn-secondary" data-close-modal="history-modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/movements.js"></script>
+  <script src="js/inventory.js"></script>
+</body>
+</html>
