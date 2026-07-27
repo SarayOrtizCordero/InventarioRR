@@ -271,12 +271,41 @@ async function deleteProduct(productId) {
 }
 
 // --- Modal: añadir producto ---
+async function loadModelOptionsForCategory(categoryId) {
+  const modelSelect = document.getElementById('product-model-select');
+  modelSelect.innerHTML = '<option value="">Cargando modelos...</option>';
+
+  const { data, error } = await supabaseClient
+    .from('products')
+    .select('model')
+    .eq('category_id', categoryId);
+
+  const models = error ? [] : [...new Set(data.map((p) => p.model))].sort((a, b) => a.localeCompare(b, 'es'));
+
+  modelSelect.innerHTML =
+    '<option value="" disabled selected>Selecciona un modelo</option>' +
+    models.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('') +
+    '<option value="__new__">+ Nuevo modelo…</option>';
+
+  const newModelInput = document.getElementById('product-model-new');
+  newModelInput.value = '';
+  newModelInput.classList.add('hidden');
+  newModelInput.required = false;
+}
+
+function getSelectedModel() {
+  const modelSelect = document.getElementById('product-model-select');
+  return modelSelect.value === '__new__'
+    ? document.getElementById('product-model-new').value.trim()
+    : modelSelect.value;
+}
+
 async function handleAddProduct(e) {
   e.preventDefault();
 
   const payload = {
     category_id: Number(document.getElementById('product-category').value),
-    model: document.getElementById('product-model').value.trim(),
+    model: getSelectedModel(),
     size: document.getElementById('product-size').value,
     color: document.getElementById('product-color').value.trim(),
     quantity: 0,
@@ -299,6 +328,8 @@ async function handleAddProduct(e) {
   }
 
   document.getElementById('add-product-form').reset();
+  document.getElementById('product-model-new').classList.add('hidden');
+  document.getElementById('product-model-new').required = false;
   closeModal('add-product-modal');
 
   if (product.category_id === activeCategoryId) {
@@ -358,6 +389,7 @@ function closeModal(modalId) {
 function wireModals() {
   document.getElementById('open-add-product').addEventListener('click', () => {
     document.getElementById('add-product-modal').classList.remove('hidden');
+    loadModelOptionsForCategory(Number(document.getElementById('product-category').value));
   });
   document.getElementById('open-history').addEventListener('click', () => {
     openHistoryModal(null, 'Historial de movimientos');
@@ -369,6 +401,18 @@ function wireModals() {
 
   document.getElementById('add-product-form').addEventListener('submit', handleAddProduct);
   document.getElementById('stock-form').addEventListener('submit', handleStockSubmit);
+
+  document.getElementById('product-category').addEventListener('change', (e) => {
+    loadModelOptionsForCategory(Number(e.target.value));
+  });
+
+  document.getElementById('product-model-select').addEventListener('change', (e) => {
+    const newModelInput = document.getElementById('product-model-new');
+    const isNew = e.target.value === '__new__';
+    newModelInput.classList.toggle('hidden', !isNew);
+    newModelInput.required = isNew;
+    if (isNew) newModelInput.focus();
+  });
 
   document.getElementById('back-to-models').addEventListener('click', exitToModels);
   document.getElementById('filter-color').addEventListener('change', renderVariants);

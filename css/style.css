@@ -708,6 +708,10 @@ input:focus, select:focus {
   gap: 12px;
 }
 
+#product-model-new {
+  margin-top: 8px;
+}
+
 .field-row label {
   margin-top: 12px;
 }
