@@ -709,7 +709,8 @@ input:focus, select:focus {
 }
 
 #product-model-new,
-#product-size-new {
+#product-size-new,
+#product-color-new {
   margin-top: 8px;
 }
 

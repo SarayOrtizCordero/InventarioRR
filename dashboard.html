@@ -92,12 +92,13 @@
           <div>
             <label for="product-size-select">Talla</label>
             <select id="product-size-select" required>
-              <option value="XS">XS</option>
               <option value="S">S</option>
               <option value="M" selected>M</option>
               <option value="L">L</option>
               <option value="XL">XL</option>
               <option value="XXL">XXL</option>
+              <option value="3XL">3XL</option>
+              <option value="4XL">4XL</option>
               <option value="__new__">+ Nueva talla…</option>
             </select>
             <input type="text" id="product-size-new" class="hidden" placeholder="Ej: 42">
@@ -108,8 +109,44 @@
           </div>
         </div>
 
-        <label for="product-color">Color</label>
-        <input type="text" id="product-color" required placeholder="Ej: Azul marino">
+        <label for="product-color-select">Color</label>
+        <select id="product-color-select" required>
+          <option value="" disabled selected>Selecciona un color</option>
+          <option value="Amarillo">Amarillo</option>
+          <option value="Amarillo Flúor">Amarillo Flúor</option>
+          <option value="Arena Oscuro">Arena Oscuro</option>
+          <option value="Azul Luz de Luna">Azul Luz de Luna</option>
+          <option value="Blanco">Blanco</option>
+          <option value="Celeste">Celeste</option>
+          <option value="Coral">Coral</option>
+          <option value="Flúor">Flúor</option>
+          <option value="Gris">Gris</option>
+          <option value="Gris Vigoré">Gris Vigoré</option>
+          <option value="Lima">Lima</option>
+          <option value="Marino">Marino</option>
+          <option value="Marino/Amarillo Flúor">Marino/Amarillo Flúor</option>
+          <option value="Marino/Naranja Flúor">Marino/Naranja Flúor</option>
+          <option value="Morado">Morado</option>
+          <option value="Naranja Flúor">Naranja Flúor</option>
+          <option value="Negro">Negro</option>
+          <option value="Plomo Oscuro">Plomo Oscuro</option>
+          <option value="Plomo/Amarillo Flúor">Plomo/Amarillo Flúor</option>
+          <option value="Rojo">Rojo</option>
+          <option value="Rojo Laboral/Amarillo Flúor">Rojo Laboral/Amarillo Flúor</option>
+          <option value="Rosa Flúor">Rosa Flúor</option>
+          <option value="Rosa Lady Flúor">Rosa Lady Flúor</option>
+          <option value="Rosetón">Rosetón</option>
+          <option value="Royal">Royal</option>
+          <option value="Turquesa">Turquesa</option>
+          <option value="Verde Flúor">Verde Flúor</option>
+          <option value="Verde Helecho">Verde Helecho</option>
+          <option value="Verde Jardín/Amarillo Flúor">Verde Jardín/Amarillo Flúor</option>
+          <option value="Verde Kelly">Verde Kelly</option>
+          <option value="Verde Menta">Verde Menta</option>
+          <option value="Verde Militar">Verde Militar</option>
+          <option value="__new__">+ Nuevo color…</option>
+        </select>
+        <input type="text" id="product-color-new" class="hidden" placeholder="Nombre del nuevo color">
 
         <div class="modal-buttons">
           <button type="button" class="btn-secondary" data-close-modal="add-product-modal">Cancelar</button>

@@ -307,6 +307,33 @@ function getSelectedSize() {
     : sizeSelect.value;
 }
 
+function getSelectedColor() {
+  const colorSelect = document.getElementById('product-color-select');
+  return colorSelect.value === '__new__'
+    ? document.getElementById('product-color-new').value.trim()
+    : colorSelect.value;
+}
+
+const NEW_OPTION_FIELDS = ['product-model', 'product-size', 'product-color'];
+
+function resetNewFieldInputs() {
+  NEW_OPTION_FIELDS.forEach((field) => {
+    const input = document.getElementById(`${field}-new`);
+    input.classList.add('hidden');
+    input.required = false;
+  });
+}
+
+function wireNewOptionToggle(field) {
+  document.getElementById(`${field}-select`).addEventListener('change', (e) => {
+    const newInput = document.getElementById(`${field}-new`);
+    const isNew = e.target.value === '__new__';
+    newInput.classList.toggle('hidden', !isNew);
+    newInput.required = isNew;
+    if (isNew) newInput.focus();
+  });
+}
+
 async function handleAddProduct(e) {
   e.preventDefault();
 
@@ -314,7 +341,7 @@ async function handleAddProduct(e) {
     category_id: Number(document.getElementById('product-category').value),
     model: getSelectedModel(),
     size: getSelectedSize(),
-    color: document.getElementById('product-color').value.trim(),
+    color: getSelectedColor(),
     quantity: 0,
   };
 
@@ -335,10 +362,7 @@ async function handleAddProduct(e) {
   }
 
   document.getElementById('add-product-form').reset();
-  document.getElementById('product-model-new').classList.add('hidden');
-  document.getElementById('product-model-new').required = false;
-  document.getElementById('product-size-new').classList.add('hidden');
-  document.getElementById('product-size-new').required = false;
+  resetNewFieldInputs();
   closeModal('add-product-modal');
 
   if (product.category_id === activeCategoryId) {
@@ -415,21 +439,7 @@ function wireModals() {
     loadModelOptionsForCategory(Number(e.target.value));
   });
 
-  document.getElementById('product-model-select').addEventListener('change', (e) => {
-    const newModelInput = document.getElementById('product-model-new');
-    const isNew = e.target.value === '__new__';
-    newModelInput.classList.toggle('hidden', !isNew);
-    newModelInput.required = isNew;
-    if (isNew) newModelInput.focus();
-  });
-
-  document.getElementById('product-size-select').addEventListener('change', (e) => {
-    const newSizeInput = document.getElementById('product-size-new');
-    const isNew = e.target.value === '__new__';
-    newSizeInput.classList.toggle('hidden', !isNew);
-    newSizeInput.required = isNew;
-    if (isNew) newSizeInput.focus();
-  });
+  NEW_OPTION_FIELDS.forEach(wireNewOptionToggle);
 
   document.getElementById('back-to-models').addEventListener('click', exitToModels);
   document.getElementById('filter-color').addEventListener('change', renderVariants);
