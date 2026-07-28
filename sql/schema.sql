@@ -74,9 +74,11 @@ alter table profiles enable row level security;
 alter table products enable row level security;
 alter table stock_movements enable row level security;
 
--- Categorías: cualquier usuario autenticado puede leer
+-- Categorías: cualquier usuario autenticado puede leer y crear nuevas
 create policy "categories_select" on categories
   for select using (auth.role() = 'authenticated');
+create policy "categories_insert" on categories
+  for insert with check (auth.role() = 'authenticated');
 
 -- Perfiles: cualquier autenticado puede leer todos los perfiles
 create policy "profiles_select" on profiles

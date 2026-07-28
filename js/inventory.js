@@ -56,7 +56,10 @@ async function loadCategories() {
   }
 
   categories = data;
-  activeCategoryId = categories[0]?.id ?? null;
+  if (!categories.some((cat) => cat.id === activeCategoryId)) {
+    activeCategoryId = categories[0]?.id ?? null;
+    activeModel = null;
+  }
 
   const tabsContainer = document.getElementById('category-tabs');
   const selectEl = document.getElementById('product-category');
@@ -81,6 +84,43 @@ async function loadCategories() {
     option.textContent = cat.name;
     selectEl.appendChild(option);
   });
+
+  const addTab = document.createElement('button');
+  addTab.type = 'button';
+  addTab.className = 'category-tab category-tab-add';
+  addTab.innerHTML = `${ICONS.plus} Nueva`;
+  addTab.addEventListener('click', () => {
+    document.getElementById('category-name').value = '';
+    document.getElementById('add-category-modal').classList.remove('hidden');
+  });
+  tabsContainer.appendChild(addTab);
+}
+
+async function handleAddCategory(e) {
+  e.preventDefault();
+
+  const name = document.getElementById('category-name').value.trim();
+
+  const { data: category, error } = await supabaseClient
+    .from('categories')
+    .insert({ name })
+    .select()
+    .single();
+
+  if (error) {
+    const message =
+      error.code === '23505' ? 'Ya existe una categoría con ese nombre.' : 'No se pudo crear la categoría: ' + error.message;
+    alert(message);
+    return;
+  }
+
+  document.getElementById('add-category-form').reset();
+  closeModal('add-category-modal');
+
+  activeCategoryId = category.id;
+  activeModel = null;
+  await loadCategories();
+  await loadProducts();
 }
 
 // --- Productos ---
@@ -434,6 +474,7 @@ function wireModals() {
 
   document.getElementById('add-product-form').addEventListener('submit', handleAddProduct);
   document.getElementById('stock-form').addEventListener('submit', handleStockSubmit);
+  document.getElementById('add-category-form').addEventListener('submit', handleAddCategory);
 
   document.getElementById('product-category').addEventListener('change', (e) => {
     loadModelOptionsForCategory(Number(e.target.value));

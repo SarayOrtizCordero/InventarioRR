@@ -71,6 +71,27 @@
     </section>
   </main>
 
+  <!-- Modal: Añadir categoría -->
+  <div id="add-category-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Añadir categoría</h2>
+        <button type="button" class="modal-close" data-close-modal="add-category-modal" aria-label="Cerrar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+        </button>
+      </div>
+      <form id="add-category-form">
+        <label for="category-name">Nombre</label>
+        <input type="text" id="category-name" required placeholder="Ej: Guantes">
+
+        <div class="modal-buttons">
+          <button type="button" class="btn-secondary" data-close-modal="add-category-modal">Cancelar</button>
+          <button type="submit" class="btn-primary">Guardar categoría</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal: Añadir producto -->
   <div id="add-product-modal" class="modal hidden">
     <div class="modal-content">

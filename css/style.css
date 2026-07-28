@@ -450,6 +450,14 @@ input:focus, select:focus {
   font-weight: 600;
 }
 
+.category-tab-add {
+  background: transparent;
+  border-style: dashed;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .products-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
