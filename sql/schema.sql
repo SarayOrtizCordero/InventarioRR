@@ -3,7 +3,7 @@
 -- Ejecutar completo en el SQL Editor de Supabase
 -- ============================================================
 
--- 1. Categorías (fijas)
+-- 1. Categorías (semilla inicial; se pueden añadir más desde la app)
 create table if not exists categories (
   id bigint generated always as identity primary key,
   name text not null unique
