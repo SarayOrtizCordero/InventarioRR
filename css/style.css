@@ -708,7 +708,8 @@ input:focus, select:focus {
   gap: 12px;
 }
 
-#product-model-new {
+#product-model-new,
+#product-size-new {
   margin-top: 8px;
 }
 

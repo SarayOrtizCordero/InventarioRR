@@ -300,13 +300,20 @@ function getSelectedModel() {
     : modelSelect.value;
 }
 
+function getSelectedSize() {
+  const sizeSelect = document.getElementById('product-size-select');
+  return sizeSelect.value === '__new__'
+    ? document.getElementById('product-size-new').value.trim()
+    : sizeSelect.value;
+}
+
 async function handleAddProduct(e) {
   e.preventDefault();
 
   const payload = {
     category_id: Number(document.getElementById('product-category').value),
     model: getSelectedModel(),
-    size: document.getElementById('product-size').value,
+    size: getSelectedSize(),
     color: document.getElementById('product-color').value.trim(),
     quantity: 0,
   };
@@ -330,6 +337,8 @@ async function handleAddProduct(e) {
   document.getElementById('add-product-form').reset();
   document.getElementById('product-model-new').classList.add('hidden');
   document.getElementById('product-model-new').required = false;
+  document.getElementById('product-size-new').classList.add('hidden');
+  document.getElementById('product-size-new').required = false;
   closeModal('add-product-modal');
 
   if (product.category_id === activeCategoryId) {
@@ -412,6 +421,14 @@ function wireModals() {
     newModelInput.classList.toggle('hidden', !isNew);
     newModelInput.required = isNew;
     if (isNew) newModelInput.focus();
+  });
+
+  document.getElementById('product-size-select').addEventListener('change', (e) => {
+    const newSizeInput = document.getElementById('product-size-new');
+    const isNew = e.target.value === '__new__';
+    newSizeInput.classList.toggle('hidden', !isNew);
+    newSizeInput.required = isNew;
+    if (isNew) newSizeInput.focus();
   });
 
   document.getElementById('back-to-models').addEventListener('click', exitToModels);

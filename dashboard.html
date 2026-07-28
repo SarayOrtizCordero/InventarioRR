@@ -90,15 +90,17 @@
 
         <div class="field-row">
           <div>
-            <label for="product-size">Talla</label>
-            <select id="product-size" required>
+            <label for="product-size-select">Talla</label>
+            <select id="product-size-select" required>
               <option value="XS">XS</option>
               <option value="S">S</option>
               <option value="M" selected>M</option>
               <option value="L">L</option>
               <option value="XL">XL</option>
               <option value="XXL">XXL</option>
+              <option value="__new__">+ Nueva talla…</option>
             </select>
+            <input type="text" id="product-size-new" class="hidden" placeholder="Ej: 42">
           </div>
           <div>
             <label for="product-quantity">Cantidad inicial</label>
