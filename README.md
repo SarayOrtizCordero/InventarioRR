@@ -1,4 +1,4 @@
-# Inventario de Ropa — Demo
+# Inventario de Ropa
 
 Panel web para gestionar el inventario de productos de ropa por categorías, con ajustes de stock automáticos (nunca se edita la cantidad a mano) e historial de movimientos.
 
