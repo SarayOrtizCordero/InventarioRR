@@ -33,7 +33,7 @@ values ('UID-DE-LA-MANO-DERECHA', 'Nombre Mano Derecha', 'mano_derecha');
 
 ## 3. Si ya tenías el proyecto creado antes: habilitar categorías nuevas
 
-Si tu base de datos ya existía antes de esta versión, ve a **SQL Editor** y ejecuta [`sql/add_category_insert_policy.sql`](sql/add_category_insert_policy.sql). Añade el permiso que falta para poder crear categorías nuevas desde la app (el botón "+ Nueva" junto a las pestañas). Si estás montando el proyecto desde cero, no hace falta: ya está incluido en `schema.sql`.
+Si tu base de datos ya existía antes de esta versión, ve a **SQL Editor** y ejecuta [`sql/add_category_insert_policy.sql`](sql/add_category_insert_policy.sql) y [`sql/add_category_delete_policy.sql`](sql/add_category_delete_policy.sql). Añaden los permisos que faltan para crear categorías nuevas desde la app (el botón "+ Nueva" junto a las pestañas) y para poder borrar alguna por API si hiciera falta más adelante. Si estás montando el proyecto desde cero, no hace falta: ya están incluidos en `schema.sql`.
 
 ## 4. (Opcional) Cargar prendas de ejemplo
 
